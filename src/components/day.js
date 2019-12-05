@@ -1,4 +1,4 @@
-import {MonthItems} from '../const'
+import {MonthItems} from '../const';
 export const createDayTemplate = (counter, date) => `
     <li class="trip-days__item  day">
       <div class="day__info">
