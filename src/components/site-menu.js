@@ -1,3 +1,5 @@
+import {createElement} from '../util';
+
 const createSiteMenuMarkup = (menuItem) => {
   return (
     `<a
@@ -9,7 +11,7 @@ const createSiteMenuMarkup = (menuItem) => {
   );
 };
 
-export const createSiteMenuTemplate = (menuItems) => {
+const createSiteMenuTemplate = (menuItems) => {
   const menuMarkup = menuItems.map((it) => createSiteMenuMarkup(it)).join(`\n`);
   return (
     `<nav class="trip-controls__trip-tabs  trip-tabs">
@@ -17,3 +19,27 @@ export const createSiteMenuTemplate = (menuItems) => {
     </nav>`
   );
 };
+
+export default class SiteMenu {
+  constructor(menuItem) {
+    this._menuItem = menuItem;
+
+    this._element = null;
+  }
+
+  getTemplate() {
+    return createSiteMenuTemplate(this._menuItem);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}

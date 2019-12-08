@@ -25,12 +25,20 @@ const DestinationItems = [
   `Helsinki`,
 ];
 
-const OfferItems = [
-  `Add luggage`,
-  `Switch to comfort class`,
-  `Add meal`,
-  `Travel by train`,
-  `Choose seats`,
+const offerNameByType = {
+  'luggage': `Add luggage`,
+  'comfort': `Switch to comfort class`,
+  'meal': `Add meal`,
+  'train': `Travel by train`,
+  'seats': `Choose seats`,
+};
+
+const OfferTypeItems = [
+  `luggage`,
+  `comfort`,
+  `meal`,
+  `train`,
+  `seats`,
 ];
 
 const getRandomArrayItem = (array) => {
@@ -87,13 +95,15 @@ const generatePrice = () => {
 };
 
 const generateOffers = () => {
-  let offerItems = OfferItems.slice();
+  let offerItems = OfferTypeItems.slice();
   const generateOffer = () => {
-    const name = getRandomArrayItem(offerItems);
-    offerItems.splice(offerItems.indexOf(name), 1);
+    const type = getRandomArrayItem(offerItems);
+    offerItems.splice(offerItems.indexOf(type), 1);
     return {
-      name,
+      name: offerNameByType[type],
+      type,
       price: getRandomIntegerNumber(MIN_OFFER_PRICE, MAX_OFFER_PRICE),
+      active: true,
     };
   };
 
