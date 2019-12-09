@@ -1,12 +1,12 @@
-import {createDayTemplate} from './components/day';
-import {createFiltersTemplate} from './components/filter';
-import {createSiteMenuTemplate} from './components/site-menu';
-import {createSortFilterTemplate} from './components/sort-filter';
-import {createTripDaysTemplate} from './components/trip-days';
-import {createTripEventTemplate} from './components/trip-event';
-import {createTripEventEditTemplate} from './components/trip-event-edit';
-import {createTripInfoTitleTemplate} from './components/trip-info-title';
-import {getResultPrice} from './components/get-result-price';
+import {render, RenderPosition, getResultPrice} from './util';
+import Day from './components/day';
+import Filter from './components/filter';
+import SiteMenu from './components/site-menu';
+import SortFilter from './components/sort-filter';
+import TripDays from './components/trip-days';
+import TripEvent from './components/trip-event';
+import TripEventEdit from './components/trip-event-edit';
+import TripInfoTitle from './components/trip-info-title';
 import {generateTripEvents} from './mock/trip-event';
 import {filters} from './mock/filter';
 import {menuItems} from './mock/site-menu';
@@ -16,30 +16,44 @@ const TRIP_EVENT_COUNT = 5;
 
 const tripEvents = generateTripEvents(TRIP_EVENT_COUNT);
 
-const render = (container, template, place = `beforeend`) => {
-  container.insertAdjacentHTML(place, template);
+const renderTripEvent = (tripEvent, place, count) => {
+  const tripEventComponent = new TripEvent(tripEvent);
+  const tripEventEditComponent = new TripEventEdit(tripEvent, false, count);
+
+  const editButton = tripEventComponent.getElement().querySelector(`.event__rollup-btn`);
+  editButton.addEventListener(`click`, () => {
+    place.replaceChild(tripEventEditComponent.getElement(), tripEventComponent.getElement());
+  });
+
+  tripEventEditComponent.getElement().addEventListener(`submit`, () => {
+    place.replaceChild(tripEventComponent.getElement(), tripEventEditComponent.getElement());
+  });
+
+  render(place, tripEventComponent.getElement(), RenderPosition.BEFOREEND);
 };
 
 // Отрисовка в index
 const tripInfoElement = document.querySelector(`.trip-info`);
-render(tripInfoElement, createTripInfoTitleTemplate(), `afterbegin`); // Информация о маршруте.
+render(tripInfoElement, new TripInfoTitle().getElement(), RenderPosition.AFTERBEGIN); // Информация о маршруте.
 
 const tripControlsElement = document.querySelector(`.trip-controls`);
-render(tripControlsElement, createSiteMenuTemplate(menuItems), `afterbegin`); // «Меню»
-render(tripControlsElement, createFiltersTemplate(filters)); // «Фильтры»
+render(tripControlsElement, new SiteMenu(menuItems).getElement(), RenderPosition.AFTERBEGIN); // «Меню»
+render(tripControlsElement, new Filter(filters).getElement()); // «Фильтры»
 
 const tripEventsElement = document.querySelector(`.trip-events`);
-render(tripEventsElement, createSortFilterTemplate());
-render(tripEventsElement, createTripEventEditTemplate(defaultEditedTripEvent, true)); // «Форма создания»
+render(tripEventsElement, new SortFilter().getElement());
+render(tripEventsElement, new TripEventEdit(defaultEditedTripEvent, true, 0).getElement()); // «Форма создания»
 tripEventsElement.querySelector(`.event--edit`).classList.add(`trip-events__item`);
 
-render(tripEventsElement, createTripDaysTemplate());
+const tripDays = new TripDays();
+render(tripEventsElement, tripDays.getElement());
 
 tripEvents.sort((a, b) => a.startDate - b.startDate);
 
-const tripDaysElement = document.querySelector(`.trip-days`);
+const tripDaysElement = tripDays.getElement();
 
 let dayCounter = 1;
+let eventCounter = 1;
 tripEvents.forEach((tripEvent) => {
   const tripEventDataTime = `${tripEvent.startDate.getYear() + 1900}-${tripEvent.startDate.getMonth() + 1}-${tripEvent.startDate.getDay() + 1}`;
 
@@ -50,13 +64,13 @@ tripEvents.forEach((tripEvent) => {
   }
 
   if (lastDayElementDataTime !== tripEventDataTime) {
-    render(tripDaysElement, createDayTemplate(dayCounter, tripEvent.startDate));
+    render(tripDaysElement, new Day(dayCounter, tripEvent.startDate).getElement());
     dayCounter++;
   }
 
   const newLastDayElement = tripDaysElement.querySelector(`.day:last-child`);
   const tripEventsListLastDayElement = newLastDayElement.querySelector(`.trip-events__list`);
-  render(tripEventsListLastDayElement, createTripEventTemplate(tripEvent)); // «Карточка»
+  renderTripEvent(tripEvent, tripEventsListLastDayElement, eventCounter); // «Карточка»
 });
 
 const costValue = document.querySelector(`.trip-info__cost-value`);
