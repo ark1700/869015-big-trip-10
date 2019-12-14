@@ -1,4 +1,5 @@
-import {getTitle, castTimeFormat, createElement} from '../util';
+import AbstractComponent from './abstract-component.js';
+import {getTitle, castTimeFormat} from '../utils/common';
 
 const DestinationItems = [
   `Geneva`,
@@ -69,7 +70,7 @@ const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
   const offersMarkup = editedTripEvent.offers.map((offer) => getOfferMarkup(offer)).join(`\n`);
 
   return (
-    `<form class="event  event--edit" action="#" method="post">
+    `<form class="event  event--edit ${isNewEvent ? `trip-events__item` : ``}" action="#" method="post">
     <header class="event__header">
       <div class="event__type-wrapper">
         <label class="event__type  event__type-btn" for="event-type-toggle-${count}">
@@ -165,28 +166,21 @@ const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
   );
 };
 
-export default class TripEventEdit {
+export default class TripEventEdit extends AbstractComponent {
   constructor(editedTripEvent, isNewEvent, count) {
+    super();
+
     this._editedTripEvent = editedTripEvent;
     this._isNewEvent = isNewEvent;
     this._count = count;
-
-    this._element = null;
   }
 
   getTemplate() {
     return createTripEventEditTemplate(this._editedTripEvent, this._isNewEvent, this._count);
   }
 
-  getElement() {
-    if (!this._element) {
-      this._element = createElement(this.getTemplate());
-    }
-
-    return this._element;
-  }
-
-  removeElement() {
-    this._element = null;
+  setSubmitHandler(handler) {
+    this.getElement()
+      .addEventListener(`submit`, handler);
   }
 }
