@@ -27,7 +27,7 @@ const tripEventsElement = document.querySelector(`.trip-events`);
 const tripDays = new TripDays();
 render(tripEventsElement, tripDays); // «Фильтры»
 
-const tripController = new TripController(tripDays);
+const tripController = new TripController(tripEventsElement);
 tripController.render(tripEvents);
 
 const costValue = document.querySelector(`.trip-info__cost-value`);
