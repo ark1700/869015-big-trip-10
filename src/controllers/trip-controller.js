@@ -1,6 +1,6 @@
 import {render, replace} from '../utils/render';
 import Day from '../components/day';
-import SortFilter from '../components/sort-filter';
+import SortFilter, {SortType} from '../components/sort-filter';
 import TripDays from '../components/trip-days';
 import TripEvent from '../components/trip-event';
 import TripEventEdit from '../components/trip-event-edit';
@@ -33,6 +33,29 @@ const renderTripEvent = (tripEvent, place, count) => {
   render(place, tripEventComponent);
 };
 
+const renderTripEvents = (tripDaysElement, tripEvents) => {
+  let dayCounter = 1;
+  let eventCounter = 1;
+  tripEvents.forEach((tripEvent) => {
+    const tripEventDataTime = `${tripEvent.startDate.getYear() + 1900}-${tripEvent.startDate.getMonth() + 1}-${tripEvent.startDate.getDay() + 1}`;
+
+    const lastDayElement = tripDaysElement.querySelector(`.day:last-child`);
+    let lastDayElementDataTime;
+    if (lastDayElement) {
+      lastDayElementDataTime = lastDayElement.querySelector(`.day__date`).dateTime;
+    }
+
+    if (lastDayElementDataTime !== tripEventDataTime) {
+      render(tripDaysElement, new Day(dayCounter, tripEvent.startDate));
+      dayCounter++;
+    }
+
+    const newLastDayElement = tripDaysElement.querySelector(`.day:last-child`);
+    const tripEventsListLastDayElement = newLastDayElement.querySelector(`.trip-events__list`);
+    renderTripEvent(tripEvent, tripEventsListLastDayElement, eventCounter); // «Карточка»
+  });
+};
+
 export default class TripController {
   constructor(container) {
     this._container = container;
@@ -45,7 +68,8 @@ export default class TripController {
 
   render(tripEvents) {
     const container = this._container.getElement();
-    render(container, new SortFilter());
+    const sortFilter = this._sortFilter;
+    render(container, sortFilter);
 
     const tripDays = new TripDays();
     const isTripEventsExist = !!tripEvents.length;
@@ -63,25 +87,27 @@ export default class TripController {
 
     const tripDaysElement = tripDays.getElement();
 
-    let dayCounter = 1;
-    let eventCounter = 1;
-    tripEvents.forEach((tripEvent) => {
-      const tripEventDataTime = `${tripEvent.startDate.getYear() + 1900}-${tripEvent.startDate.getMonth() + 1}-${tripEvent.startDate.getDay() + 1}`;
+    renderTripEvents(tripDaysElement, tripEvents);
 
-      const lastDayElement = tripDaysElement.querySelector(`.day:last-child`);
-      let lastDayElementDataTime;
-      if (lastDayElement) {
-        lastDayElementDataTime = lastDayElement.querySelector(`.day__date`).dateTime;
+    this._sortFilter.setSortTypeChangeHandler((sortType) => {
+      let sortedTripEvents = [];
+
+      switch (sortType) {
+        case SortType.TIME:
+          sortedTripEvents = tripEvents.slice().sort((a, b) => (b.endDate - b.startDate) - (a.endDate - a.startDate));
+          break;
+        case SortType.PRICE:
+          sortedTripEvents = tripEvents.slice().sort((a, b) => b.price - a.price);
+          break;
+        case SortType.DEFAULT:
+          sortedTripEvents = tripEvents.slice();
+          break;
       }
 
-      if (lastDayElementDataTime !== tripEventDataTime) {
-        render(tripDaysElement, new Day(dayCounter, tripEvent.startDate));
-        dayCounter++;
-      }
+      tripDaysElement.innerHTML = ``;
 
-      const newLastDayElement = tripDaysElement.querySelector(`.day:last-child`);
-      const tripEventsListLastDayElement = newLastDayElement.querySelector(`.trip-events__list`);
-      renderTripEvent(tripEvent, tripEventsListLastDayElement, eventCounter); // «Карточка»
+      renderTripEvents(tripDaysElement, sortedTripEvents);
     });
   }
 }
+
