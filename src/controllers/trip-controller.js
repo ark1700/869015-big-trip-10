@@ -4,8 +4,8 @@ import SortFilter, {SortType} from '../components/sort-filter';
 import TripDays from '../components/trip-days';
 import PointController from '../controllers/point-controller';
 import NoPoints from '../components/no-points';
-import TripEventEdit from '../components/trip-event-edit';
-import {defaultEditedTripEvent} from '../mock/default-edited-trip-event';
+// import TripEventEdit from '../components/trip-event-edit';
+// import {defaultEditedTripEvent} from '../mock/default-edited-trip-event';
 
 const renderTripEvents = (tripDaysElement, tripEvents, onDataChange, onViewChange) => {
   let dayCounter = 1;
@@ -67,9 +67,6 @@ export default class TripController {
     tripEvents.sort((a, b) => a.startDate - b.startDate);
 
     const tripDaysElement = this._tripDays.getElement();
-
-    // const newTasks = renderTasks(taskListElement, this._tasks.slice(0, this._showingTasksCount), this._onDataChange, this._onViewChange);
-    // this._showedTaskControllers = this._showedTaskControllers.concat(newTasks);
 
     const newTripEvents = renderTripEvents(tripDaysElement, this._tripEvents.slice(), this._onDataChange, this._onViewChange);
     this._showedTripEventControllers = this._showedTripEventControllers.concat(newTripEvents);
