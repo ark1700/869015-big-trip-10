@@ -1,5 +1,7 @@
-import AbstractComponent from './abstract-component.js';
-import {getTitle, castTimeFormat} from '../utils/common';
+import AbstractSmartComponent from './abstract-smart-component.js';
+import flatpickr from 'flatpickr';
+import moment from 'moment';
+import {getTitle} from '../utils/common';
 
 const DestinationItems = [
   `Geneva`,
@@ -25,7 +27,8 @@ const ActivityList = [
   `restaurant`,
 ];
 
-const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
+const createTripEventEditTemplate = (editedTripEvent, isNewEvent) => {
+  const count = 1;
   const getDestinationOption = (destination) => {
     return (
       `<option value="${destination}"></option>`
@@ -57,8 +60,8 @@ const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
   const getOfferMarkup = (offer) => {
     return (
       `<div class="event__offer-selector">
-        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.type}-${count}" type="checkbox" name="event-offer-${offer.type}" ${offer.active ? `checked` : ``}>
-        <label class="event__offer-label" for="event-offer-${offer.type}-1">
+        <input class="event__offer-checkbox  visually-hidden" id="event-offer-${offer.type}" type="checkbox" name="event-offer-${offer.type}" ${offer.active ? `checked` : ``}>
+        <label class="event__offer-label" for="event-offer-${offer.type}">
           <span class="event__offer-title">${offer.name}</span>
           &plus;
           &euro;&nbsp;<span class="event__offer-price">${offer.price}</span>
@@ -109,12 +112,12 @@ const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
         <label class="visually-hidden" for="event-start-time-${count}">
           From
         </label>
-        <input class="event__input  event__input--time" id="event-start-time-${count}" type="text" name="event-start-time" value="${castTimeFormat(editedTripEvent.startDate.getDay() + 1)}/${castTimeFormat(editedTripEvent.startDate.getMonth() + 1)}/${castTimeFormat(editedTripEvent.startDate.getYear().toString().slice(1))} ${castTimeFormat(editedTripEvent.startDate.getHours())}:${castTimeFormat(editedTripEvent.startDate.getMinutes())}">
+        <input class="event__input  event__input--time" id="event-start-time-${count}" type="text" name="event-start-time" value="${moment(editedTripEvent.startDate).format(`DD/MM/YY hh:mm`)}">
         &mdash;
         <label class="visually-hidden" for="event-end-time-${count}">
-          To
+          To 30/11/2019 18:37
         </label>
-        <input class="event__input  event__input--time" id="event-end-time-${count}" type="text" name="event-end-time" value="${castTimeFormat(editedTripEvent.endDate.getDay() + 1)}/${castTimeFormat(editedTripEvent.endDate.getMonth() + 1)}/${castTimeFormat(editedTripEvent.endDate.getYear().toString().slice(1))} ${castTimeFormat(editedTripEvent.endDate.getHours())}:${castTimeFormat(editedTripEvent.endDate.getMinutes())}">
+        <input class="event__input  event__input--time" id="event-end-time-${count}" type="text" name="event-end-time" value="${moment(editedTripEvent.endDate).format(`DD/MM/YY hh:mm`)}">
       </div>
 
       <div class="event__field-group  event__field-group--price">
@@ -166,21 +169,99 @@ const createTripEventEditTemplate = (editedTripEvent, isNewEvent, count) => {
   );
 };
 
-export default class TripEventEdit extends AbstractComponent {
-  constructor(editedTripEvent, isNewEvent, count) {
+export default class TripEventEdit extends AbstractSmartComponent {
+  constructor(editedTripEvent, isNewEvent) {
     super();
 
     this._editedTripEvent = editedTripEvent;
     this._isNewEvent = isNewEvent;
-    this._count = count;
+    this._flatpickr = null;
+    this._submitHandler = null;
+
+    this._applyFlatpickr();
+    this._subscribeOnEvents();
   }
 
   getTemplate() {
     return createTripEventEditTemplate(this._editedTripEvent, this._isNewEvent, this._count);
   }
 
+  recoveryListeners() {
+    this.setSubmitHandler(this._submitHandler);
+    this.setCloseEditButtonClickHandler(this._setCloseEditButtonClickHandler);
+    this.setFavoritesButtonClickHandler(this._setFavoritesButtonClickHandler);
+
+    this._subscribeOnEvents();
+  }
+
+  rerender() {
+    super.rerender();
+
+    this._applyFlatpickr();
+  }
+
+  reset() {
+    this.rerender();
+  }
+
   setSubmitHandler(handler) {
     this.getElement()
       .addEventListener(`submit`, handler);
+
+    this._submitHandler = handler;
+  }
+
+  setCloseEditButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__rollup-btn`)
+      .addEventListener(`click`, handler);
+
+
+    this._setCloseEditButtonClickHandler = handler;
+  }
+
+  setFavoritesButtonClickHandler(handler) {
+    this.getElement().querySelector(`.event__favorite-btn`)
+      .addEventListener(`click`, handler);
+
+
+    this._setFavoritesButtonClickHandler = handler;
+  }
+
+  _applyFlatpickr() {
+    if (this._flatpickr) {
+      this._flatpickr.destroy();
+      this._flatpickr = null;
+    }
+    const startDateElement = this.getElement().querySelector(`#event-start-time-1`);
+    this._flatpickr = flatpickr(startDateElement, {
+      allowInput: true,
+      defaultDate: this._editedTripEvent.startDate,
+      enableTime: true,
+      dateFormat: `d/m/y H:i`,
+    });
+
+    const endDateElement = this.getElement().querySelector(`#event-end-time-1`);
+    this._flatpickr = flatpickr(endDateElement, {
+      allowInput: true,
+      defaultDate: this._editedTripEvent.endDate,
+      enableTime: true,
+      dateFormat: `d/m/y H:i`,
+    });
+
+  }
+
+  _subscribeOnEvents() {
+    const element = this.getElement();
+
+    const type = element.querySelector(`.event__type-list`);
+    if (type) {
+      type.addEventListener(`click`, (evt) => {
+        if (evt.target.value && evt.target.value !== this._editedTripEvent.type) {
+          this._editedTripEvent.type = evt.target.value;
+
+          this.rerender();
+        }
+      });
+    }
   }
 }
