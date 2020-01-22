@@ -1,5 +1,6 @@
 import AbstractComponent from './abstract-component.js';
 import {formatTime, formatSubstractTime, getTitle} from '../utils/common';
+import moment from 'moment';
 
 const createTripEventTemplate = (tripEvent) => {
   const {destination, type, price, startDate, endDate, offers} = tripEvent;
@@ -26,9 +27,9 @@ const createTripEventTemplate = (tripEvent) => {
 
         <div class="event__schedule">
           <p class="event__time">
-            <time class="event__start-time" datetime="2019-03-18T10:30">${formatTime(startDate)}</time>
+            <time class="event__start-time" datetime="${moment(startDate).format(`YYYY-MM-DDThh:mm`)}">${formatTime(startDate)}</time>
             &mdash;
-            <time class="event__end-time" datetime="2019-03-18T11:00">${formatTime(endDate)}</time>
+            <time class="event__end-time" datetime="${moment(endDate).format(`YYYY-MM-DDThh:mm`)}">${formatTime(endDate)}</time>
           </p>
           <p class="event__duration">${formatSubstractTime(startDate, endDate)}</p>
         </div>

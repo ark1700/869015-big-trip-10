@@ -1,11 +1,11 @@
 import AbstractComponent from './abstract-component.js';
-import {MonthItems} from '../const';
+import moment from 'moment';
 
 const createDayTemplate = (counter, date) => {
   return (`<li class="trip-days__item  day">
     <div class="day__info">
       <span class="day__counter">${counter}</span>
-      <time class="day__date" datetime="${date.getYear() + 1900}-${date.getMonth() + 1}-${date.getDay() + 1}">${MonthItems[date.getMonth() + 1]} ${date.getDay() + 1}</time>
+      <time class="day__date" datetime="${moment(date).format(`YYYY-MM-DD`)}">${moment(date).format(`MMM`)} ${moment(date).format(`D`)}</time>
     </div>
 
     <ul class="trip-events__list">

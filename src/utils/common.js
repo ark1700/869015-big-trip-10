@@ -1,12 +1,11 @@
-const castTimeFormat = (value) => {
-  return value < 10 ? `0${value}` : String(value);
-};
+import moment from 'moment';
 
 const formatTime = (date) => {
-  const hours = castTimeFormat(date.getHours());
-  const minutes = castTimeFormat(date.getMinutes());
+  return moment(date).format(`hh:mm`);
+};
 
-  return `${hours}:${minutes}`;
+const castTimeFormat = (value) => {
+  return value < 10 ? `0${value}` : String(value);
 };
 
 const formatSubstractTime = (firstDate, secondDate) => {
@@ -38,4 +37,4 @@ const getTitle = (tripType) => {
 };
 
 
-export {castTimeFormat, formatTime, formatSubstractTime, getTitle};
+export {formatTime, formatSubstractTime, getTitle};
