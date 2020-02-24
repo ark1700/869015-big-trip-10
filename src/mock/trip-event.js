@@ -6,8 +6,8 @@ const MIN_DESCR_NUMBER = 1;
 const MAX_DESCR_NUMBER = 3;
 const MIN_PRICE = 100;
 const MAX_PRICE = 900;
-const MIN_OFFERS_NUMBER = 0;
-const MAX_OFFERS_NUMBER = 2;
+const MIN_OFFERS_NUMBER = 2;
+const MAX_OFFERS_NUMBER = 3;
 const MIN_OFFER_PRICE = 5;
 const MAX_OFFER_PRICE = 100;
 
@@ -100,7 +100,7 @@ const generateOffers = () => {
     const type = getRandomArrayItem(offerItems);
     offerItems.splice(offerItems.indexOf(type), 1);
     return {
-      name: offerNameByType[type],
+      title: offerNameByType[type],
       type,
       price: getRandomIntegerNumber(MIN_OFFER_PRICE, MAX_OFFER_PRICE),
       active: true,
@@ -115,6 +115,7 @@ const generateOffers = () => {
 const generateTripEvent = () => {
   const date = generateDate();
   return {
+    id: String(new Date() + Math.random()),
     type: generateType(),
     destination: generateDestination(),
     photos: generatePhotos(),

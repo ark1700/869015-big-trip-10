@@ -1,40 +1,27 @@
-import moment from 'moment';
+import {tripTypes} from '../const.js';
 
-const formatTime = (date) => {
-  return moment(date).format(`hh:mm`);
-};
+export const getCurrentPreInputText = (currentType) => {
+  let result = ``;
 
-const castTimeFormat = (value) => {
-  return value < 10 ? `0${value}` : String(value);
-};
-
-const formatSubstractTime = (firstDate, secondDate) => {
-  const diff = parseInt((secondDate.getTime() - firstDate.getTime()), 10);
-  const days = (Math.floor(diff / 24 / 60 / 60 / 1000));
-  const hours = (Math.floor(diff / 60 / 60 / 1000)) % 24;
-  const minutes = (Math.floor(diff / 60 / 1000)) % 60;
-
-  return `${days ? `D` + castTimeFormat(days) : ``} ${hours ? `H` + castTimeFormat(hours) : ``} ${minutes ? `M` + castTimeFormat(minutes) : ``}`;
-};
-
-const getTitle = (tripType) => {
-  let title = ``;
-  switch (tripType) {
-    case `check`:
-      title = title + `Check into `;
+  for (const elem of tripTypes) {
+    const currentTypeResult = elem.list.find((innerElem) => (innerElem.name === currentType));
+    if (currentTypeResult) {
+      result = `${currentTypeResult.text} ${elem.action}`;
       break;
-
-    case `sightseeing`:
-    case `restaurant`:
-      break;
-
-    default:
-      title += `${tripType[0].toUpperCase() + tripType.slice(1)} to `;
-      break;
+    }
   }
 
-  return title;
+  return result;
 };
 
-
-export {formatTime, formatSubstractTime, getTitle};
+export const getDefaultEventData = (eventData) => (
+  {
+    'type': eventData ? eventData.type : ``,
+    'date_from': eventData ? eventData.date_from : ``,
+    'date_to': eventData ? eventData.date_to : ``,
+    'destination': eventData ? eventData.destination : ``,
+    'base_price': eventData ? eventData.base_price : ``,
+    'is_favorite': eventData ? eventData.is_favorite : ``,
+    'offers': eventData ? eventData.offers : ``,
+  }
+);

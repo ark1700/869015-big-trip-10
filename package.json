@@ -5,16 +5,16 @@
   "description": "Личный проект «Большое путешествие» от HTML Academy",
   "scripts": {
     "build": "webpack",
+    "start": "webpack-dev-server --open",
     "eslint": "eslint src/**/*.js",
-    "test": "npm run eslint",
-    "start": "webpack-dev-server --open"
+    "test": "npm run eslint"
   },
   "devDependencies": {
-    "css-loader": "3.3.0",
+    "css-loader": "3.4.0",
     "eslint": "6.1.0",
     "eslint-config-htmlacademy": "0.5.2",
     "moment-locales-webpack-plugin": "1.1.2",
-    "style-loader": "1.0.1",
+    "style-loader": "1.1.1",
     "webpack": "4.41.2",
     "webpack-cli": "3.3.10",
     "webpack-dev-server": "3.9.0"
@@ -23,6 +23,8 @@
     "node": "10"
   },
   "dependencies": {
+    "chart.js": "2.9.3",
+    "chartjs-plugin-datalabels": "0.7.0",
     "flatpickr": "4.6.3",
     "moment": "2.24.0"
   }

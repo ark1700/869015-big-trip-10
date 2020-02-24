@@ -1,34 +1,36 @@
-import {render, RenderPosition} from './utils/render';
-import Filter from './components/filter';
-import SiteMenu from './components/site-menu';
-import TripDays from './components/trip-days';
-import TripInfoTitle from './components/trip-info-title';
-import GetResultPrice from './components/get-result-price';
-import {generateTripEvents} from './mock/trip-event';
-import {filters} from './mock/filter';
-import {menuItems} from './mock/site-menu';
-import TripController from './controllers/trip-controller';
+import API from './api.js';
+import Points from './models/points.js';
+import Offers from './models/offers.js';
+import Destinations from './models/destinations.js';
+import TripInfoController from './controllers/trip-info.js';
+import FilterController from './controllers/filter.js';
+import TripController from './controllers/trip.js';
 
-const TRIP_EVENT_COUNT = 5;
+const AUTHORIZATION = `Basic dXNckB46YsXzsddF249Zasd45sAo=`;
+const END_POINT = `https://htmlacademy-es-10.appspot.com/big-trip`;
 
-const tripEvents = generateTripEvents(TRIP_EVENT_COUNT);
+const api = new API(END_POINT, AUTHORIZATION);
+const pointsModel = new Points(api);
+const offersModel = new Offers();
+const destinationsModel = new Destinations();
 
+const tripInfoElement = document.querySelector(`.trip-main__trip-info`);
 const tripControlsElement = document.querySelector(`.trip-controls`);
-render(tripControlsElement, new SiteMenu(menuItems), RenderPosition.AFTERBEGIN); // «Меню»
-
-
-render(tripControlsElement, new Filter(filters)); // «Фильтры»
-
-const tripInfoElement = document.querySelector(`.trip-info`);
-render(tripInfoElement, new TripInfoTitle(), RenderPosition.AFTERBEGIN); // Информация о маршруте.
-
-
 const tripEventsElement = document.querySelector(`.trip-events`);
-const tripDays = new TripDays();
-render(tripEventsElement, tripDays); // «Фильтры»
 
-const tripController = new TripController(tripDays);
-tripController.render(tripEvents);
+const tripInfoController = new TripInfoController(tripInfoElement, pointsModel);
+const filterController = new FilterController(tripControlsElement, pointsModel, tripInfoController);
+const tripController = new TripController(tripEventsElement, tripControlsElement, pointsModel, offersModel, destinationsModel, filterController, api, tripInfoController);
 
-const costValue = document.querySelector(`.trip-info__cost-value`);
-render(costValue, new GetResultPrice(tripEvents));
+filterController.render();
+tripInfoController.render();
+
+Promise.all([api.getDestinations(), api.getOffers(), api.getPoints()])
+  .then((values) => {
+    const [destinations, offers, points] = values;
+    destinationsModel.setDestinations(destinations);
+    offersModel.setOffers(offers);
+    pointsModel.setPoints(points);
+    tripInfoController.updateTripInfo();
+    tripController.render();
+  });

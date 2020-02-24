@@ -7,24 +7,18 @@ export const createElement = (template) => {
   const newElement = document.createElement(`div`);
   newElement.innerHTML = template;
 
-  return newElement.firstChild;
+  return newElement.firstElementChild;
 };
 
-export const render = (container, component, place) => {
+export const render = (container, element, place) => {
   switch (place) {
     case RenderPosition.AFTERBEGIN:
-      container.prepend(component.getElement());
+      container.prepend(element);
       break;
     case RenderPosition.BEFOREEND:
-    default:
-      container.append(component.getElement());
+      container.append(element);
       break;
   }
-};
-
-export const remove = (component) => {
-  component.getElement().remove();
-  component.removeElement();
 };
 
 export const replace = (newComponent, oldComponent) => {
@@ -37,4 +31,9 @@ export const replace = (newComponent, oldComponent) => {
   if (isExistElements && parentElement.contains(oldElement)) {
     parentElement.replaceChild(newElement, oldElement);
   }
+};
+
+export const remove = (component) => {
+  component.getElement().remove();
+  component.removeElement();
 };
